@@ -1,0 +1,5 @@
+.env
+streambot.log
+__pycache__
+Bot/Bot_session.session
+Bot/Bot_session.session-journal
