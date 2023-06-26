@@ -1,5 +1,8 @@
 import pprint
+import readline
 
+from bson import ObjectId
+from datetime import datetime
 from pyrogram.types import Message
 from Bot.bot import TGBot
 from Bot.utils.database import Database
@@ -8,7 +11,7 @@ db=Database()
 async def update_file():
     channel_id="rmx_1911"
 
-    message=await TGBot.get_messages(channel_id,list(range(1,200 +1)))
+    message=await TGBot.get_messages(channel_id,list(range(177,200 +1)))
     for m in message:
         if m.empty:
             print(f"{m.id}: Empty")
@@ -17,9 +20,10 @@ async def update_file():
         if not text:
             print(f"{m.id}: None")
             continue
+
         text=text.markdown
         text+=get_button(m)
-        print(f"{'-'*60}\n{m.id}\n{'-'*60}")
+        print(f"{'-'*60}\n{m.id}\nhttps://t.me/{channel_id}/{m.id}\ntime: {m.date}\n{'-'*60}")
         print(text)
         skip=input("Skip?: ")
         if not (skip == "n"):
@@ -35,7 +39,7 @@ async def update_file():
         data["version"] = input("File version: ")
         data["status"] = input("File Status (1-Official / 2-Community / 3 - Port / ''-Unofficial): ")
         data["dev"] = input("Dev username: ")
-        data["release_date"] = input("Release Date: ")
+        data["release_date"] = input("Enter date (format: dd-mm-yyyy): ")
         data["download_link"] = {}
 
         if data["status"] == "1":
@@ -70,18 +74,26 @@ async def update_file():
             if not (data["kernel_version"]):
                 data["kernel_version"]=None
 
+        if data["release_date"]:
+            data["release_date"]=datetime.strptime(data["release_date"], "%d-%m-%Y")
+        else:
+            data["release_date"]=m.date
+
+        data["_id"] = ObjectId.from_datetime(data["release_date"])        
+        data["dev"]=data["dev"].removeprefix("@")
+        data["device"]=data["device"].split(" ")
+
         while True:
-            key = input("Enter Build Type (or 'done' to finish): ")
-            if key.lower() == "done":
+            key = input("Enter Build Type: ")
+            if not key:
                 break
             value = input("Enter Download Link: ")
             data["download_link"][key] = value
 
         print("*"*60)
-        data["device"]=data["device"].split(" ")
         pprint.pprint(data, indent=4)
         for x in data["device"]:
-            await db.add_file(data["device"], data["type"], data)
+            await db.add_file(str(x), data["type"], data)
         print("*"*60)
 
 def get_button(m:Message):
