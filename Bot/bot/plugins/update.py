@@ -1,8 +1,12 @@
+import logging
 import pprint
 import readline
+import sys
+import traceback
 
 from bson import ObjectId
 from datetime import datetime
+import pymongo
 from pyrogram.types import Message
 from Bot.bot import TGBot
 from Bot.utils.database import Database
@@ -11,7 +15,7 @@ db=Database()
 async def update_file():
     channel_id="rmx_1911"
 
-    message=await TGBot.get_messages(channel_id,list(range(177,200 +1)))
+    message=await TGBot.get_messages(channel_id,list(range(335,400 +1)))
     for m in message:
         if m.empty:
             print(f"{m.id}: Empty")
@@ -59,6 +63,7 @@ async def update_file():
             data["device"]="RMX2030"
         elif not (data["device"]):
             data["device"]="r5x"
+# RMX1911 RMX1925 RMX2030 Realme5NFC
 
         if data["type"] == "1":
             data["type"]="ROM"
@@ -93,8 +98,26 @@ async def update_file():
         print("*"*60)
         pprint.pprint(data, indent=4)
         for x in data["device"]:
-            await db.add_file(str(x), data["type"], data)
+            try:
+                await add_data(str(x), data)
+                print("Stored")
+            except:
+                traceback.print_exc()
+                logging.info(x)
+                sys.exit()
+
         print("*"*60)
+
+async def add_data(x:str, data):
+    try:
+        await db.add_file(str(x), data["type"], data)
+    except pymongo.errors.DuplicateKeyError as e:
+        logging.error("Error: Duplicate key")
+        data["release_date"]=input("Another date (dd-mm-yyyy HH:MM): ")
+        data["release_date"]=datetime.strptime(data["release_date"], "%d-%m-%Y %H:%M")
+        data["_id"] = ObjectId.from_datetime(data["release_date"])  
+        await add_data(x, data)
+
 
 def get_button(m:Message):
     if m.reply_markup:

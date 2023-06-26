@@ -1,14 +1,22 @@
+from bson import ObjectId
 import motor.motor_asyncio
 from Bot.vars import Var
 
 class Database:
     client = motor.motor_asyncio.AsyncIOMotorClient(Var.DATABASE_URL)
 
-    async def get_file(self, device_codename: str, file_type: str, file_name: str):
+    async def get_file_byname(self, device_codename: str, file_type: str, file_name: str):
         db = self.client[device_codename]
         collection = db[file_type]
 
-        document = await collection.find({"name": file_name, "type": file_type})
+        document = collection.find({"name": file_name})
+        return document
+    
+    async def get_file_byid(self, device_codename: str, file_type: str, id: str):
+        db = self.client[device_codename]
+        collection = db[file_type]
+
+        document = await collection.find_one({"_id": ObjectId(id)})
         return document
 
     async def get_all_files(self, device_codename: str, file_type: str, limit: list):
@@ -31,6 +39,27 @@ class Database:
 
         await collection.insert_one(data)
 
+    async def get_doc_names(self, device_codename: str, file_type: str):
+        db = self.client[device_codename]
+        collection = db[file_type]
+    
+        distinct_keys = await collection.distinct("name")
+    
+        return distinct_keys
+    
+    async def get_col_names(self, device_codename:str):
+        db = self.client[device_codename]
+        collection_names = await db.list_collection_names()
+        return collection_names
+    
+    async def get_db_names(self):
+        db_names = await self.client.list_database_names()
+        try:
+            db_names.remove("admin")
+            db_names.remove("local")
+        except:
+            pass
+        return db_names
 
     @classmethod
     def close_connection(cls):
