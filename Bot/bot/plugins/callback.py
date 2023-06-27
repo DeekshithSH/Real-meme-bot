@@ -81,9 +81,9 @@ async def gen_ver_list(update:CallbackQuery,device:str, file_type:str, file:str,
         btn.append([InlineKeyboardButton(x.get("version"), callback_data=f"version|{device}|{file_type}|{x.get('_id')}")])
     btn.append(
         [
-            InlineKeyboardButton("<<", callback_data="{}".format(f"file|{device}|{file_type}|{file}|"+str(page_no-1) if page_no > 1 else 'N/A')),
-            InlineKeyboardButton(f"{page_no}/{math.ceil(total_files/10)}", callback_data="N/A"),
-            InlineKeyboardButton(">>", callback_data="{}".format(f"file|{device}|{file_type}|{file}|"+str(page_no+1) if total_files > page_no*10 else 'N/A'))
+            InlineKeyboardButton("<<", callback_data="{}".format(f"file|{device}|{file_type}|{file}|"+str(page_no-1) if page_no > 1 else 'NA')),
+            InlineKeyboardButton(f"{page_no}/{math.ceil(total_files/10)}", callback_data="NA"),
+            InlineKeyboardButton(">>", callback_data="{}".format(f"file|{device}|{file_type}|{file}|"+str(page_no+1) if total_files > page_no*10 else 'NA'))
         ]
     )
     btn.append([InlineKeyboardButton("Back", f"typ|{device}|{file_type}|1")])
