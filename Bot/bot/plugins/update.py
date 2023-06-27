@@ -15,7 +15,7 @@ db=Database()
 async def update_file():
     channel_id="rmx_1911"
 
-    message=await TGBot.get_messages(channel_id,list(range(335,400 +1)))
+    message=await TGBot.get_messages(channel_id,list(range(446,600 +1)))
     for m in message:
         if m.empty:
             print(f"{m.id}: Empty")

@@ -10,3 +10,5 @@ class Var(object):
    WORKERS:int = int(environ.get("", min(32, cpu_count() + 4)))
    DATABASE_URL:int = str(environ.get('DATABASE_URL'))
    BOT_TOKEN = str(environ.get("BOT_TOKEN"))
+   AUTH_USER = list(set(int(x) for x in str(environ.get("AUTH_USER", "849816969")).split()))
+   UPDATE_STATUS=""

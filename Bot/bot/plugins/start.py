@@ -1,17 +1,22 @@
 import math
 from pyrogram import filters, Client
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from Bot.vars import Var
 from Bot.bot import TGBot
 from Bot.utils.database import Database
 db = Database()
 
 @TGBot.on_message(filters.command("start") & filters.private)
 async def start(bot: Client, message: Message):
+    if not bool(await db.get_user(message.from_user.id)):
+        await db.add_user(message.from_user.id)
+
     db_names = await db.get_db_names()
     await message.reply_text(
-        "Hi 16-06-2023",
+        f"Current Status [Message ID]({Var.UPDATE_STATUS})\nSelect a Device",
         quote=True,
-        reply_markup=InlineKeyboardMarkup(await get_div_list(db_names))
+        reply_markup=InlineKeyboardMarkup(await get_div_list(db_names)),
+        disable_web_page_preview=True
     )
 
 async def get_div_list(db_names):
@@ -26,3 +31,8 @@ async def get_div_list(db_names):
     ]
     btn.append(nav_btn)
     return btn
+
+@TGBot.on_message(filters.command("update") & filters.private & filters.text & filters.user(Var.AUTH_USER))
+async def update(bot: Client, message: Message):
+    Var.UPDATE_STATUS=message.text.removeprefix("/update ")
+    await message.reply_text(Var.UPDATE_STATUS)

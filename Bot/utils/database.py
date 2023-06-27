@@ -1,3 +1,4 @@
+import time
 from bson import ObjectId
 import motor.motor_asyncio
 from Bot.vars import Var
@@ -61,9 +62,29 @@ class Database:
         try:
             db_names.remove("admin")
             db_names.remove("local")
+            db_names.remove("Bot")
         except:
             pass
         return db_names
+    
+# ----------------------add ,check or remove user----------------------
+    def new_user(self, id):
+        return dict(
+            id=id,
+            join_date=time.time()
+        )
+
+    async def add_user(self, id):
+        db = self.client["Bot"]
+        collection = db["user"]
+        user = self.new_user(id)
+        await collection.insert_one(user)
+
+    async def get_user(self, id):
+        db = self.client["Bot"]
+        collection = db["user"]
+        user = await collection.find_one({'id': int(id)})
+        return user
 
     @classmethod
     def close_connection(cls):
