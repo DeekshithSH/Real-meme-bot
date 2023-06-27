@@ -5,12 +5,16 @@ from Bot.vars import Var
 class Database:
     client = motor.motor_asyncio.AsyncIOMotorClient(Var.DATABASE_URL)
 
-    async def get_file_byname(self, device_codename: str, file_type: str, file_name: str):
+    async def get_file_byname(self, device_codename: str, file_type: str, file_name: str, limit: list):
         db = self.client[device_codename]
         collection = db[file_type]
 
-        document = collection.find({"name": file_name})
-        return document
+        files=collection.find({"name": file_name})
+        files.skip(limit[0] - 1)
+        files.limit(limit[1] - limit[0] + 1)
+        # files.sort('_id', pymongo.DESCENDING)
+        total_files = await collection.count_documents({"name": file_name})
+        return files, total_files
     
     async def get_file_byid(self, device_codename: str, file_type: str, id: str):
         db = self.client[device_codename]
