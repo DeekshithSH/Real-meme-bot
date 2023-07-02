@@ -3,6 +3,7 @@ from pyrogram import filters, Client
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from Bot.vars import Var
 from Bot.bot import TGBot
+from Bot.utils.Translation import Names
 from Bot.utils.database import Database
 db = Database()
 
@@ -22,7 +23,7 @@ async def start(bot: Client, message: Message):
 async def get_div_list(db_names):
     btn=[]
     for x in db_names[0:10]:
-        btn.append([InlineKeyboardButton(str(x), f"div|{str(x)}")])
+        btn.append([InlineKeyboardButton(str(Names.Device.get(x, x)), f"div|{str(x)}")])
     
     nav_btn=[
         InlineKeyboardButton("<<", "NA"),

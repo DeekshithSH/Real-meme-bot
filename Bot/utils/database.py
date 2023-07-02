@@ -63,6 +63,7 @@ class Database:
             db_names.remove("admin")
             db_names.remove("local")
             db_names.remove("Bot")
+            db_names.sort()
         except:
             pass
         return db_names

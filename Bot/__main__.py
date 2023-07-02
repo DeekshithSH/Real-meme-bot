@@ -4,7 +4,7 @@ import logging
 import logging.handlers as handlers
 from pyrogram import idle
 from Bot.bot import TGBot
-from Bot.bot.plugins.update import update_file
+from Bot.bot.plugins.update import update_file, fix_name
 
 logging.basicConfig(
     level=logging.INFO,
@@ -21,6 +21,7 @@ async def main():
     logging.info("Starting Bot")
     await TGBot.start()
     # await update_file()
+    # await fix_name()
     await idle()
 
 if __name__ == "__main__":

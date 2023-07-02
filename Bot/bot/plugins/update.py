@@ -15,7 +15,8 @@ db=Database()
 async def update_file():
     channel_id="rmx_1911"
 
-    message=await TGBot.get_messages(channel_id,list(range(446,600 +1)))
+    # message=await TGBot.get_messages(channel_id,list(range(446,600 +1)))
+    message=await TGBot.get_messages(channel_id,list(range(1942,1872 +201)))
     for m in message:
         if m.empty:
             print(f"{m.id}: Empty")
@@ -30,7 +31,7 @@ async def update_file():
         print(f"{'-'*60}\n{m.id}\nhttps://t.me/{channel_id}/{m.id}\ntime: {m.date}\n{'-'*60}")
         print(text)
         skip=input("Skip?: ")
-        if not (skip == "n"):
+        if not (skip):
             print("skiped")
             continue
         data={}
@@ -62,7 +63,7 @@ async def update_file():
         elif data["device"] == "3":
             data["device"]="RMX2030"
         elif not (data["device"]):
-            data["device"]="r5x"
+            data["device"]="R5X"
 # RMX1911 RMX1925 RMX2030 Realme5NFC
 
         if data["type"] == "1":
@@ -129,3 +130,28 @@ def get_button(m:Message):
                         text+=f"\n{y.text}: {y.url}"
             return text
     return ""
+
+async def fix_name():
+    alist:set={"Test1", "Test2"}
+    device="RMX1911"
+    type="ROM"
+    RMX1911=await db.get_doc_names(device, type)
+    for x in RMX1911:
+        alist.add(x)
+
+    device="RMX1925"
+    RMX1925=await db.get_doc_names(device, type)
+    for x in RMX1925:
+        alist.add(x)
+
+    device="RMX2030"
+    RMX2030=await db.get_doc_names(device, type)
+    for x in RMX2030:
+        alist.add(x)
+
+    device="r5x"
+    r5x=await db.get_doc_names(device, type)
+    for x in r5x:
+        alist.add(x)
+
+    print(sorted(alist))

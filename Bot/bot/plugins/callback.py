@@ -1,6 +1,7 @@
 from datetime import datetime
 import math
 from Bot.bot import TGBot
+from Bot.utils.Translation import Names
 from Bot.vars import Var
 from Bot.utils.database import Database
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
@@ -36,7 +37,7 @@ async def gen_device_list(update: CallbackQuery, page_no:int):
     device_names=device_names[lrange[0]:lrange[1]]
     btn=[]
     for x in device_names:
-        btn.append([InlineKeyboardButton(str(x), f"div|{str(x)}")])
+        btn.append([InlineKeyboardButton(str(Names.Device.get(x, x)), f"div|{str(x)}")])
 
     nav_btn=[
         InlineKeyboardButton("<<", "{}".format("divl|"+str(page_no-1) if page_no>1 else "NA")),
@@ -50,8 +51,8 @@ async def gen_file_type_list(update:CallbackQuery, device):
     file_type=await db.get_col_names(device)
     btn=[]
     for x in file_type:
-        btn.append([InlineKeyboardButton(str(x), f"typ|{device}|{str(x)}|1")])
-    btn.append([InlineKeyboardButton("Back", "divl|1")])
+        btn.append([InlineKeyboardButton(str(Names.Type.get(x,x)), f"typ|{device}|{str(x)}|1")])
+    btn.append([InlineKeyboardButton(Names.Other[0], "divl|1")])
     await update.edit_message_text("Select Type", reply_markup=InlineKeyboardMarkup(btn))
 
 async def gen_file_list(update:CallbackQuery, device:str, file_type:str, page_no:int):
@@ -70,7 +71,7 @@ async def gen_file_list(update:CallbackQuery, device:str, file_type:str, page_no
         InlineKeyboardButton(">>", "{}".format(f"typ|{device}|{file_type}|"+str(page_no+1) if list_len>page_no*10 else "NA"))
     ]
     btn.append(nav_btn)
-    btn.append([InlineKeyboardButton("Back", f"div|{device}")])
+    btn.append([InlineKeyboardButton(Names.Other[0], f"div|{device}")])
     await update.edit_message_text(f"Select a {file_type}", reply_markup=InlineKeyboardMarkup(btn))
 
 async def gen_ver_list(update:CallbackQuery,device:str, file_type:str, file:str, page_no:int):
@@ -86,7 +87,7 @@ async def gen_ver_list(update:CallbackQuery,device:str, file_type:str, file:str,
             InlineKeyboardButton(">>", callback_data="{}".format(f"file|{device}|{file_type}|{file}|"+str(page_no+1) if total_files > page_no*10 else 'NA'))
         ]
     )
-    btn.append([InlineKeyboardButton("Back", f"typ|{device}|{file_type}|1")])
+    btn.append([InlineKeyboardButton(Names.Other[0], f"typ|{device}|{file_type}|1")])
     await update.edit_message_text("Select a Version", reply_markup=InlineKeyboardMarkup(btn))
 
 async def gen_message(update:CallbackQuery,device:str,file_type:str,_id:str):
@@ -96,7 +97,6 @@ async def gen_message(update:CallbackQuery,device:str,file_type:str,_id:str):
 <a href=https://t.me/c/{str(data.get('channel_id')).removeprefix('-100')}/{data.get('msg_id')}>Post Link</a>
 ------------------
 <b>{data.get('name')} | {data.get('version')} | {data.get('type')}</b>
-<b>{data.get('type')}</b>
 <b>{data.get('status')}</b>
 <b>{'Android '+data.get('android_version') if data.get('android_version') else ''} {'Kernel '+data.get('kernel_version') if data.get('kernel_version') else ''}</b>
 by @{data.get('dev')}
@@ -105,5 +105,5 @@ Release Date {date}
     btn=[]
     for x,y in (data.get("download_link")).items():
         btn.append([InlineKeyboardButton(x, url=y)])
-    await update.edit_message_text(message, ParseMode.HTML, True, InlineKeyboardMarkup(btn))
-    await update.message.copy(int(update.from_user.id))
+    await update.message.reply_text(message, None, ParseMode.HTML, None, True, reply_markup=InlineKeyboardMarkup(btn))
+    await update.answer(data.get('name'))
