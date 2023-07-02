@@ -1,5 +1,6 @@
-from datetime import datetime
+import logging
 import math
+from datetime import datetime
 from Bot.bot import TGBot
 from Bot.utils.Translation import Names
 from Bot.vars import Var
@@ -53,7 +54,7 @@ async def gen_file_type_list(update:CallbackQuery, device):
     for x in file_type:
         btn.append([InlineKeyboardButton(str(Names.Type.get(x,x)), f"typ|{device}|{str(x)}|1")])
     btn.append([InlineKeyboardButton(Names.Other[0], "divl|1")])
-    await update.edit_message_text("Select Type", reply_markup=InlineKeyboardMarkup(btn))
+    await update.edit_message_text(f"{device}\nSelect Type", reply_markup=InlineKeyboardMarkup(btn))
 
 async def gen_file_list(update:CallbackQuery, device:str, file_type:str, page_no:int):
     files=await db.get_doc_names(device,file_type)
@@ -72,7 +73,7 @@ async def gen_file_list(update:CallbackQuery, device:str, file_type:str, page_no
     ]
     btn.append(nav_btn)
     btn.append([InlineKeyboardButton(Names.Other[0], f"div|{device}")])
-    await update.edit_message_text(f"Select a {file_type}", reply_markup=InlineKeyboardMarkup(btn))
+    await update.edit_message_text(f"{device}\nSelect a {file_type}", reply_markup=InlineKeyboardMarkup(btn))
 
 async def gen_ver_list(update:CallbackQuery,device:str, file_type:str, file:str, page_no:int):
     file_range=[page_no*10-10+1, page_no*10]
@@ -88,7 +89,7 @@ async def gen_ver_list(update:CallbackQuery,device:str, file_type:str, file:str,
         ]
     )
     btn.append([InlineKeyboardButton(Names.Other[0], f"typ|{device}|{file_type}|1")])
-    await update.edit_message_text("Select a Version", reply_markup=InlineKeyboardMarkup(btn))
+    await update.edit_message_text(f"{device}\n{file_type}\nSelect a {file} Version\n{file_type}", reply_markup=InlineKeyboardMarkup(btn))
 
 async def gen_message(update:CallbackQuery,device:str,file_type:str,_id:str):
     data=await db.get_file_byid(device,file_type,_id)

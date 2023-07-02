@@ -4,7 +4,7 @@ import logging
 import logging.handlers as handlers
 from pyrogram import idle
 from Bot.bot import TGBot
-from Bot.bot.plugins.update import update_file, fix_name
+from Bot.utils.update import update_file, fix_name
 
 logging.basicConfig(
     level=logging.INFO,

@@ -1,3 +1,8 @@
+from os import environ, cpu_count
+from dotenv import load_dotenv
+
+load_dotenv()
+
 class Names(object):
     Device={
         "RMX1911(Old)": "📱 Realme 5(Old)",
@@ -17,3 +22,7 @@ class Names(object):
     }
 
     Other=["⬅️ Back"]
+
+class Command_Text:
+    start=environ.get("start_text", "-")
+    help=environ.get("help_text", "-")

@@ -11,4 +11,4 @@ class Var(object):
    DATABASE_URL:int = str(environ.get('DATABASE_URL'))
    BOT_TOKEN = str(environ.get("BOT_TOKEN"))
    AUTH_USER = list(set(int(x) for x in str(environ.get("AUTH_USER", "849816969")).split()))
-   UPDATE_STATUS=""
+   # UPDATE_STATUS=""

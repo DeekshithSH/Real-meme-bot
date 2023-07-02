@@ -1,3 +1,4 @@
+import logging
 from pyrogram import Client
 from Bot.vars import Var
 

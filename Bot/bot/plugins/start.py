@@ -1,9 +1,10 @@
+import logging
 import math
 from pyrogram import filters, Client
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from Bot.vars import Var
 from Bot.bot import TGBot
-from Bot.utils.Translation import Names
+from Bot.utils.Translation import Names, Command_Text
 from Bot.utils.database import Database
 db = Database()
 
@@ -14,7 +15,7 @@ async def start(bot: Client, message: Message):
 
     db_names = await db.get_db_names()
     await message.reply_text(
-        f"Current Status [Message ID]({Var.UPDATE_STATUS})\nSelect a Device",
+        f"Hi {message.from_user.mention()},\n{Command_Text.start}\nSelect a Device",
         quote=True,
         reply_markup=InlineKeyboardMarkup(await get_div_list(db_names)),
         disable_web_page_preview=True
@@ -33,7 +34,11 @@ async def get_div_list(db_names):
     btn.append(nav_btn)
     return btn
 
-@TGBot.on_message(filters.command("update") & filters.private & filters.text & filters.user(Var.AUTH_USER))
-async def update(bot: Client, message: Message):
-    Var.UPDATE_STATUS=message.text.removeprefix("/update ")
-    await message.reply_text(Var.UPDATE_STATUS)
+# @TGBot.on_message(filters.command("update") & filters.private & filters.text & filters.user(Var.AUTH_USER))
+# async def update(bot: Client, message: Message):
+#     Var.UPDATE_STATUS=message.text.removeprefix("/update ")
+#     await message.reply_text(Var.UPDATE_STATUS)
+
+@TGBot.on_message(filters.command("help") & filters.private)
+async def help(bot: Client, message: Message):
+    await message.reply_text(Command_Text.help)

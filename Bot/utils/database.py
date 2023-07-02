@@ -1,3 +1,4 @@
+import logging
 import time
 from bson import ObjectId
 import motor.motor_asyncio
@@ -49,12 +50,15 @@ class Database:
         collection = db[file_type]
     
         distinct_keys = await collection.distinct("name")
+        distinct_keys.sort(key=lambda s: s.casefold())
     
         return distinct_keys
     
     async def get_col_names(self, device_codename:str):
         db = self.client[device_codename]
         collection_names = await db.list_collection_names()
+        collection_names.sort()
+        
         return collection_names
     
     async def get_db_names(self):
@@ -63,12 +67,21 @@ class Database:
             db_names.remove("admin")
             db_names.remove("local")
             db_names.remove("Bot")
+            db_names.remove("Info")
             db_names.sort()
         except:
             pass
         return db_names
     
-# ----------------------add ,check or remove user----------------------
+# ----------------------add ,check or user----------------------
+
+    async def get_text(self, command):
+        db = self.client["Info"]
+        collection = db["Text"]
+
+        document = await collection.find_one({"command": command})
+        return document.get("text", "") if document else ""
+
     def new_user(self, id):
         return dict(
             id=id,
