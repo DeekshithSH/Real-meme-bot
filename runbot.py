@@ -23,7 +23,6 @@ async def main():
     # await update_file()
     # await fix_name()
     await idle()
-
 if __name__ == "__main__":
     try:
         loop.run_until_complete(main())
