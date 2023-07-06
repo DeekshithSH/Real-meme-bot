@@ -98,7 +98,7 @@ async def gen_message(update:CallbackQuery,device:str,file_type:str,_id:str):
 <a href=https://t.me/c/{str(data.get('channel_id')).removeprefix('-100')}/{data.get('msg_id')}>Post Link</a>
 ------------------
 <b>{data.get('name')} | {data.get('version')} | {data.get('type')}</b>
-<b>{data.get('status')}</b>
+<b>{data.get('status') if not (data.get('type')=='Kernel') else ''}</b>
 <b>{'Android '+data.get('android_version') if data.get('android_version') else ''} {'Kernel '+data.get('kernel_version') if data.get('kernel_version') else ''}</b>
 by @{data.get('dev')}
 Release Date {date}
