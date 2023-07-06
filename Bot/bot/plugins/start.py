@@ -13,7 +13,7 @@ async def start(bot: Client, message: Message):
     if not bool(await db.get_user(message.from_user.id)):
         await db.add_user(message.from_user.id)
 
-    db_names = await db.get_db_names()
+    db_names = [item for item in (await db.get_db_names()) if not item.endswith('(Old)')]            
     await message.reply_text(
         f"Hi {message.from_user.mention()},\n{Command_Text.start}\nSelect a Device",
         quote=True,
@@ -31,6 +31,7 @@ async def get_div_list(db_names):
         InlineKeyboardButton(f"1/{math.ceil(len(db_names)/10)}", "NA"),
         InlineKeyboardButton(">>", "{}".format("divl|2" if len(btn)>10 else "NA"))
     ]
+    btn.append([InlineKeyboardButton("🕰️ Old Build", "old|1")])
     btn.append(nav_btn)
     return btn
 

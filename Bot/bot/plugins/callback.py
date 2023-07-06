@@ -31,8 +31,11 @@ async def cb_data(bot, update: CallbackQuery):
     elif cd[0]=="version":
         await gen_message(update, cd[1],cd[2], cd[3])
 
+    elif cd[0]=="old":
+        await gen_oldbuild_list(update, int(cd[1]))
+
 async def gen_device_list(update: CallbackQuery, page_no:int):
-    device_names = await db.get_db_names()
+    device_names = [item for item in (await db.get_db_names()) if not item.endswith('(Old)')] 
     list_len=len(device_names)
     lrange=[((page_no-1)*10),(page_no*10)]
     device_names=device_names[lrange[0]:lrange[1]]
@@ -45,6 +48,7 @@ async def gen_device_list(update: CallbackQuery, page_no:int):
         InlineKeyboardButton(f"{page_no}/{math.ceil(list_len/10)}", "NA"),
         InlineKeyboardButton(">>", "{}".format("divl|"+str(page_no+1) if list_len>page_no*10 else "NA"))
     ]
+    btn.append([InlineKeyboardButton("🕰️ Old Build", "old|1")])
     btn.append(nav_btn)
     await update.edit_message_text("Select Device", reply_markup=InlineKeyboardMarkup(btn))
 
@@ -108,3 +112,21 @@ Release Date {date}
         btn.append([InlineKeyboardButton(x, url=y)])
     await update.message.reply_text(message, None, ParseMode.HTML, None, True, reply_markup=InlineKeyboardMarkup(btn))
     await update.answer(data.get('name'))
+
+async def gen_oldbuild_list(update: CallbackQuery, page_no:int):
+    device_names = [item for item in (await db.get_db_names()) if item.endswith('(Old)')] 
+    list_len=len(device_names)
+    lrange=[((page_no-1)*10),(page_no*10)]
+    device_names=device_names[lrange[0]:lrange[1]]
+    btn=[]
+    for x in device_names:
+        btn.append([InlineKeyboardButton(str(Names.Device.get(x, x)), f"div|{str(x)}")])
+
+    nav_btn=[
+        InlineKeyboardButton("<<", "{}".format("divl|"+str(page_no-1) if page_no>1 else "NA")),
+        InlineKeyboardButton(f"{page_no}/{math.ceil(list_len/10)}", "NA"),
+        InlineKeyboardButton(">>", "{}".format("divl|"+str(page_no+1) if list_len>page_no*10 else "NA"))
+    ]
+    btn.append(nav_btn)
+    btn.append([InlineKeyboardButton(Names.Other[0], f"divl|1")])
+    await update.edit_message_text("Select Device", reply_markup=InlineKeyboardMarkup(btn))
