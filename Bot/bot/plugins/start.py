@@ -42,4 +42,4 @@ async def get_div_list(db_names):
 
 @TGBot.on_message(filters.command("help") & filters.private)
 async def help(bot: Client, message: Message):
-    await message.reply_text(Command_Text.help)
+    await message.reply_text(Command_Text.help, disable_web_page_preview=True)
