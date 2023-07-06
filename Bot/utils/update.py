@@ -9,6 +9,7 @@ from datetime import datetime
 import pymongo
 from pyrogram.types import Message
 from Bot.bot import TGBot
+from Bot.vars import Var
 from Bot.utils.database import Database
 db=Database()
 
@@ -16,7 +17,7 @@ async def update_file():
     channel_id="rmx_1911"
 
     # message=await TGBot.get_messages(channel_id,list(range(446,600 +1)))
-    message=await TGBot.get_messages(channel_id,list(range(1942,1872 +201)))
+    message=await TGBot.get_messages(channel_id,list(range(Var.STARTMSGID,Var.ENDMSGID)))
     for m in message:
         if m.empty:
             print(f"{m.id}: Empty")

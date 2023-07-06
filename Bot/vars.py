@@ -12,3 +12,6 @@ class Var(object):
    BOT_TOKEN = str(environ.get("BOT_TOKEN"))
    AUTH_USER = list(set(int(x) for x in str(environ.get("AUTH_USER", "849816969")).split()))
    # UPDATE_STATUS=""
+   STARTMSGID=int(environ.get("STARTMSGID", 1))
+   ENDMSGID=environ.get("ENDMSGID", None)
+   ENDMSGID=int(ENDMSGID) if ENDMSGID else int(STARTMSGID+200)

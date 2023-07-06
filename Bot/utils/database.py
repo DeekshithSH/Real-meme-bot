@@ -1,5 +1,6 @@
 import logging
 import time
+import pymongo
 from bson import ObjectId
 import motor.motor_asyncio
 from Bot.vars import Var
@@ -14,7 +15,7 @@ class Database:
         files=collection.find({"name": file_name})
         files.skip(limit[0] - 1)
         files.limit(limit[1] - limit[0] + 1)
-        # files.sort('_id', pymongo.DESCENDING)
+        files.sort('_id', pymongo.DESCENDING)
         total_files = await collection.count_documents({"name": file_name})
         return files, total_files
     
