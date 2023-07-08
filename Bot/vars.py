@@ -15,3 +15,13 @@ class Var(object):
    STARTMSGID=int(environ.get("STARTMSGID", 1))
    ENDMSGID=environ.get("ENDMSGID", None)
    ENDMSGID=int(ENDMSGID) if ENDMSGID else int(STARTMSGID+200)
+
+   PORT = int(environ.get("PORT", 8080))
+   BIND_ADDRESS = str(environ.get("WEB_SERVER_BIND_ADDRESS", "0.0.0.0"))
+   HAS_SSL = environ.get("HAS_SSL", False)
+   HAS_SSL = True if str(HAS_SSL).lower() == "true" else False
+   NO_PORT = environ.get("NO_PORT", False)
+   NO_PORT = True if str(NO_PORT).lower() == "true" else False
+   FQDN = str(environ.get("FQDN", BIND_ADDRESS))
+   URL = "http{}://{}{}/".format(
+            "s" if HAS_SSL else "", FQDN, "" if NO_PORT else ":" + str(PORT))
