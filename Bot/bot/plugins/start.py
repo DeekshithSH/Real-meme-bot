@@ -89,6 +89,11 @@ async def reply_handler(bot: Client, message: Message):
             for x in await db.get_db_names():
                 text+=f"<code{x}></code>\n"
             await message.reply_text(text)
+        elif missing_keys[1] == "name":
+            text="{}\n".format(data.get("type"))
+            for x in await db.get_doc_names(data["device"], data["type"]):
+                text+=f"<code{x}></code>\n"
+            await message.reply_text(text)
     else:
         if data.get("done", False):
             await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "/upload"), disable_web_page_preview=True)
