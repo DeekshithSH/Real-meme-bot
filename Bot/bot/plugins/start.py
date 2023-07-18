@@ -1,10 +1,13 @@
+from datetime import datetime
 import re
 import json
 import logging
 import math
+import sys
+from bson import ObjectId
+import pymongo
 from pyrogram import filters, Client
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
-from Bot.vars import Var
 from Bot.bot import TGBot
 from Bot.utils.Translation import Names, Command_Text, Types
 from Bot.utils.database import Database
@@ -56,11 +59,14 @@ async def help(bot: Client, message: Message):
 
 @TGBot.on_message(filters.private & filters.text & filters.reply)
 async def reply_handler(bot: Client, message: Message):
+    if message.text in ["/upload"]:
+        message.continue_propagation()
     logging.debug("reply_handler start")
     try:
         data: dict =json.loads(message.reply_to_message.text)
         logging.debug("Decoded json")
     except json.JSONDecodeError:
+        logging.debug(sys.exc_info())
         message.continue_propagation()
 
     build_type=str(data.get("type", None)).lower()
@@ -78,68 +84,140 @@ async def reply_handler(bot: Client, message: Message):
 
     if len(missing_keys)>1:
         data[missing_keys[0]]=message.text
-        await message.reply_text(Command_Text.reply.get(missing_keys[1], "Something went wrong\nContact the Owner"))
-        await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, str(missing_keys[1])))
+        logging.debug("Missing Key: {}".format(missing_keys))
+        logging.debug("Next Key:{}".format(missing_keys[1]))
+        await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, str(missing_keys[1])), disable_web_page_preview=True)
+        await message.reply_text(Command_Text.reply.get(missing_keys[1]))
+        if missing_keys[1] == "device":
+            text="Devices:\n"
+            for x in await db.get_db_names():
+                text+=f"<code{x}></code>\n"
+            await message.reply_text(text)
     else:
         if data.get("done", False):
-            if message.text.lower() == "yes":
-                return await post_process(message)
-            else:
-                await message.reply_text("There is now way to Edit the data<br>send <code>Yes</code> when yes to upload")
-                return await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "Yes"))
+            await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "/upload"), disable_web_page_preview=True)
+            return await message.reply_text("Send /upload to Upload the Build to Database")
             
         else:
-            dl_links=data.get("download_link", False)
+            dl_links=data.get("download_link", {})
             if dl_links:
-                for x, y in dl_links.items():
-                    if x and not y:
-                        dl_links[x]=message.text
-                        await message.reply_text("Send Button Text Name")
-                        await message.reply_text("Send Done if your done")
-                        await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "Build Name"))
-                    elif message.text.lower() == "done":
-                        data["done"]=True
-                        await message.reply_text("Send <code>yes</code> to Upload the Build to Database")
-                        await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "Yes"))
-                    else:
-                        dl_links[message.text]=False
-                        await message.reply_text("Send Download Link for {}".format(message.text))
-                        await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "{} Link".format(message.text)))
+                x,y=list(dl_links.keys())[-1], list(dl_links.values())[-1]
+
+                if x and not y:
+                    dl_links[x]=message.text
+                    data["download_link"]=dl_links
+                    await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "Build Name"), disable_web_page_preview=True)
+                    await message.reply_text("Send Button Text Name")
+                    return await message.reply_text("Send Done if your done")
+                elif message.text.lower() == "done":
+                    data["done"]=True
+                    await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "/upload"), disable_web_page_preview=True)
+                    return await message.reply_text("Send /upload to Upload the Build to Database")
+                else:
+                    dl_links[message.text]=False
+                    data["download_link"]=dl_links
+                    await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "{} Link".format(message.text)), disable_web_page_preview=True)
+                    return await message.reply_text("Send Download Link for {}".format(message.text))
             else:
-                await message.reply_text("Now Send Download Link Button Text<br>First Send Text Apear on The Download Button")
                 dl_links[message.text]=False
-                await message.reply_text("Send Download Link for {}".format(message.text))
-                await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "{} Link".format(message.text)))
+                data["download_link"]=dl_links
+                await message.reply_text(str(json.dumps(data, indent=2)), reply_markup=ForceReply(None, "{} Link".format(message.text)), disable_web_page_preview=True)
+                return await message.reply_text("Send Download Link for {}".format(message.text))
+            
 
-async def post_process(message:Message):
-    print(json.dumps(message.reply_to_message.text, indent=2))  
-    #
-@TGBot.on_message(filters.command("test") & filters.private)
-async def start_handler(bot: Client, message: Message):
-    await message.reply_text("Hi", reply_markup=ForceReply(None, "text"))
-#----Post process----
-# pattern = r"https:\/\/t\.me\/(?<username>[a-zA-Z0-9_-]+)\/\d+\/(?<message_id>\d+)|https:\/\/t\.me\/(?<username>[a-zA-Z0-9_-]+)\/(?<message_id>\d+)"
-# match = re.match(pattern, message.text)
+@TGBot.on_message(filters.private & filters.reply & filters.command("upload"))
+async def post_process(bot: Client, message:Message):
+    try:
+        json_data: dict =json.loads(message.reply_to_message.text)
+        logging.debug("Decoded json")
+    except json.JSONDecodeError:
+        logging.debug(sys.exc_info())
+        message.continue_propagation()  
+    
+    pattern = r"https:\/\/t\.me\/(?P<username>[a-zA-Z0-9_-]+)\/(\d+\/)?(?P<message_id>\d+)"
+    match = re.match(pattern, json_data.get("post_link"))
 
-# if match:
-#     channel_username = match.group("username")
-#     msg_id = match.group("message_id")
-#     channel_id=(await bot.get_chat(channel_username)).id
+    data: dict={
 
+    }
+    
+    if match:
+        data["channel_username"] = match.group("username")
+        data["msg_id"] = match.group("message_id")
+        try:
+            data["channel_id"] = (await bot.get_chat(data["channel_username"])).id
+        except:
+            data["channel_id"] = None
+    else:
+        data["post_link"] = json_data.get("post_link")
 
-# def get_button(m:Message):
-#     if m.reply_markup:
-#         if m.reply_markup.inline_keyboard:
-#             btn_data=[]
-#             for x in m.reply_markup.inline_keyboard:
-#                 for y in x:
-#                     if y.callback_data:
-#                         btn_data.append(y.callback_data)
-#             return btn_data
-#     return []
+    device = list(str(json_data.get("device")).split(","))
+    i=0
+    for y in device:
+        for x in await db.get_db_names():
+            if str(x).casefold().replace(" ","") == str(y).casefold().replace(" ", ""):
+                device[0]=x
+        i+=1
+    data["device"]=device
 
-# def get_next_data(text:str):
-#     steps=[
-#         "msg_id"
-#     ]
-#     text=text.split("|")
+    data["type"] = str(json_data.get("type"))
+    if data["type"].lower() == "rom":
+        data["type"]="ROM"
+    elif data["type"].lower() == "recovery":
+        data["type"]="Recovery"
+    elif data["type"].lower() == "kernel":
+        data["type"]="Kernel"
+
+    data["name"] = str(json_data.get("name"))
+    for x in await db.get_doc_names(data["device"], data["type"]):
+        if (data["name"].casefold().replace(" ", "")) == (str(x).casefold().replace(" ", "")):
+            data["name"] = str(x)
+    
+    data["version"] = str(json_data.get("version"))
+
+    data["status"] = str(json_data.get("status")).casefold().replace(" ","")
+    if data["status"] == "official":
+        data["status"]="Official"
+    elif data["status"] == "community":
+        data["status"]="Community"
+    elif data["status"] == "port":
+        data["status"]="Port"
+    else:
+        data["status"]="Unofficial"
+
+    try:
+        data["release_date"]=datetime.strptime(json_data.get("release_date"), "%d-%m-%Y")
+    except:
+        return await message.reply_text("Wrong Date Format")
+    
+    data["dev"]=json_data.get("dev").removeprefix("@")
+
+    url_pattern = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+    dl_links={}
+    for x,y in json_data.get("download_link").items():
+        match = re.match(url_pattern, y)
+        if match:
+            dl_links[x]=match.groups()[0]
+        else:
+            return await message.reply_text("Invalid Download Link")
+    data["download_link"]=dl_links
+
+    if data["type"]=="ROM":
+        data["android_version"]=json_data.get("android_version")
+    elif data["type"]=="Recovery":
+        data["kernel_version"]=json_data.get("kernel_version")
+
+    data["_id"] = ObjectId.from_datetime(data["release_date"])
+    for x in data["device"]:
+        await add_data(x, data)
+
+async def add_data(x:str, data):
+    try:
+        await db.add_file(str(x), data["type"], data)
+    except pymongo.errors.DuplicateKeyError as e:
+        logging.error("Error: Duplicate key")
+        new_date_obj = data["release_date"].strftime("%d-%m-%Y") + " " + datetime.now().strftime("%H:%M")
+
+        data["release_date"]=datetime.strptime(new_date_obj, "%d-%m-%Y %H:%M")
+        data["_id"] = ObjectId.from_datetime(data["release_date"])  
+        await add_data(x, data)

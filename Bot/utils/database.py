@@ -1,3 +1,4 @@
+from __future__ import annotations
 import logging
 import time
 import pymongo
@@ -46,14 +47,23 @@ class Database:
 
         await collection.insert_one(data)
 
-    async def get_doc_names(self, device_codename: str, file_type: str):
-        db = self.client[device_codename]
-        collection = db[file_type]
+    async def get_doc_names(self, device_codename: str|list, file_type: str):
+        if isinstance(device_codename, str):
+            db = self.client[device_codename]
+            collection = db[file_type]
     
-        distinct_keys = await collection.distinct("name")
+            distinct_keys = await collection.distinct("name")
+        elif isinstance(device_codename, list):
+            distinct_keys=[]
+            for x in device_codename:
+                db = self.client[x]
+                collection = db[file_type]
+                distinct_keys.extend(await collection.distinct("name"))
+                distinct_keys=list(set(distinct_keys))
+        
         distinct_keys.sort(key=lambda s: s.casefold())
     
-        return distinct_keys
+        return list(distinct_keys)
     
     async def get_col_names(self, device_codename:str):
         db = self.client[device_codename]

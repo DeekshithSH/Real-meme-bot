@@ -28,14 +28,14 @@ class Command_Text:
     help=environ.get("help_text", "-")
     reply={
         "post_link": "Send Channel/Group message link where the Build was Posted",
-        "type": "Send Build type <br><code>ROM</code><br><code>Kernel</code><br><code>Recovery</code>",
-        "device": "Send Device code<br>Only send new device code name if the device does not exist in below text<br> else copy paste device code name",
-        "name": "Send Build Name<br>Only send new Build name if the build name does not exist in below text<br> else copy paste build name name",
+        "type": "Send Build type \n<code>ROM</code>\n<code>Kernel</code>\n<code>Recovery</code>",
+        "device": "Send Device code\nOnly send new device code name if the device does not exist in below text\nelse copy paste device code name",
+        "name": "Send Build Name\nRom, Kernel or Recovery Name",
         "version": "send build version",
-        "status": "Status<br><code>Official</code><br><code>Community</code><br><code>Unofficial</code>",
-        "release_date": "Send Release Date",
-        "dev": "Send Developer user name",
-        "download_link": "Now Send Download Link Button Text<br>First Send Text Apear on The Download Button",
+        "status": "Status\n<code>Official</code>\n<code>Community</code>\n<code>Unofficial</code>\n<code>Port</code>",
+        "release_date": "Send Release Date\nformat: dd-mm-yyyy",
+        "dev": "Send Developer username\neg: @DeekshithSH",
+        "download_link": "Send Text which will Apear on The Download Button",
         "android_version": "Send ROM Android Version",
         "kernel_version": "Send Kernel Version",
     }
@@ -47,7 +47,7 @@ class Types(object):
         "device",
         "name",
         "version",
-        "android_version"
+        "android_version",
         "status",
         "release_date",
         "dev",
