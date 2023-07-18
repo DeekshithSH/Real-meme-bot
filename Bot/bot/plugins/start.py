@@ -87,12 +87,13 @@ async def reply_handler(bot: Client, message: Message):
         if missing_keys[1] == "device":
             text="Devices:\n"
             for x in await db.get_db_names():
-                text+=f"<code{x}></code>\n"
+                logging.debug(x)
+                text+=f"<code>{x}</code>\n"
             await message.reply_text(text)
         elif missing_keys[1] == "name":
             text="{}\n".format(data.get("type"))
             for x in await db.get_doc_names(data["device"], data["type"]):
-                text+=f"<code{x}></code>\n"
+                text+=f"<code>{x}</code>\n"
             await message.reply_text(text)
     else:
         if data.get("done", False):
@@ -205,12 +206,15 @@ async def post_process(bot: Client, message:Message):
 
     if data["type"]=="ROM":
         data["android_version"]=json_data.get("android_version")
-    elif data["type"]=="Recovery":
+    elif data["type"]=="Kernel":
         data["kernel_version"]=json_data.get("kernel_version")
+        if str(data["kernel_version"]).lower() == "none":
+            data["kernel_version"]=None
 
     data["_id"] = ObjectId.from_datetime(data["release_date"])
     for x in data["device"]:
         await add_data(x, data)
+    await message.reply_text(json.dumps(data, indent=2))
 
 async def add_data(x:str, data):
     try:
