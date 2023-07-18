@@ -9,6 +9,7 @@ import pymongo
 from pyrogram import filters, Client
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from Bot.bot import TGBot
+from Bot.vars import Var
 from Bot.utils.Translation import Names, Command_Text, Types
 from Bot.utils.database import Database
 db = Database()
@@ -40,16 +41,11 @@ async def get_div_list(db_names):
     btn.append(nav_btn)
     return btn
 
-# @TGBot.on_message(filters.command("update") & filters.private & filters.text & filters.user(Var.AUTH_USER))
-# async def update(bot: Client, message: Message):
-#     Var.UPDATE_STATUS=message.text.removeprefix("/update ")
-#     await message.reply_text(Var.UPDATE_STATUS)
-
 @TGBot.on_message(filters.command("help") & filters.private)
 async def help(bot: Client, message: Message):
     await message.reply_text(Command_Text.help, disable_web_page_preview=True)
 
-@TGBot.on_message(filters.command("add") & filters.private)
+@TGBot.on_message(filters.command("add") & filters.private & filters.user(Var.ADMIN_ID))
 async def help(bot: Client, message: Message):
     await message.reply_text(
         "{}",
@@ -57,7 +53,7 @@ async def help(bot: Client, message: Message):
     )
     await message.reply_text("Send Channel/Group message link where the Build was Posted")
 
-@TGBot.on_message(filters.private & filters.text & filters.reply)
+@TGBot.on_message(filters.private & filters.text & filters.reply & filters.user(Var.ADMIN_ID))
 async def reply_handler(bot: Client, message: Message):
     if message.text in ["/upload"]:
         message.continue_propagation()
@@ -125,7 +121,7 @@ async def reply_handler(bot: Client, message: Message):
                 return await message.reply_text("Send Download Link for {}".format(message.text))
             
 
-@TGBot.on_message(filters.private & filters.reply & filters.command("upload"))
+@TGBot.on_message(filters.private & filters.reply & filters.command("upload") & filters.user(Var.ADMIN_ID))
 async def post_process(bot: Client, message:Message):
     try:
         json_data: dict =json.loads(message.reply_to_message.text)

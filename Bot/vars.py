@@ -25,3 +25,6 @@ class Var(object):
    FQDN = str(environ.get("FQDN", BIND_ADDRESS))
    URL = "http{}://{}{}/".format(
             "s" if HAS_SSL else "", FQDN, "" if NO_PORT else ":" + str(PORT))
+   OWNER_ID=list(set(int(x) for x in str(environ.get("OWNER_ID", "849816969")).split()))
+   ADMIN_ID=list(set(int(x) for x in str(environ.get("ADMIN_ID", "849816969")).split()))
+   ADMIN_ID.extend(OWNER_ID)
