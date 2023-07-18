@@ -214,6 +214,7 @@ async def post_process(bot: Client, message:Message):
     data["_id"] = ObjectId.from_datetime(data["release_date"])
     for x in data["device"]:
         await add_data(x, data)
+    data["release_date"]=str(data["release_date"])
     await message.reply_text(json.dumps(data, indent=2))
 
 async def add_data(x:str, data):
