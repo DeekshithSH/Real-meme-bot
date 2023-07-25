@@ -30,7 +30,7 @@ async def main():
     # await update_file()
     # await fix_name()
 
-    if False:
+    if True:
         logging.info("Initalizing Web Server")
         await server.setup()
         bind_address = Var.BIND_ADDRESS

@@ -33,6 +33,8 @@ async def answer(client, inline_query: InlineQuery):
         return await inline_query.answer(results, cache_time=1)
     
 
+    filtered_list = list(filter(lambda x: x.startswith(query[0]), device))
+
     results.append(InlineQueryResultArticle(
         "Something Else",
         InputTextMessageContent("Select a Device"),

@@ -9,15 +9,18 @@ from Bot.vars import Var
 class Database:
     client = motor.motor_asyncio.AsyncIOMotorClient(Var.DATABASE_URL)
 
-    async def get_file_byname(self, device_codename: str, file_type: str, file_name: str, limit: list):
+    async def get_file_byname(self, device_codename: str, file_type: str, file_name: str, limit: list=[]):
         db = self.client[device_codename]
         collection = db[file_type]
 
         files=collection.find({"name": file_name})
-        files.skip(limit[0] - 1)
-        files.limit(limit[1] - limit[0] + 1)
+        if limit:
+            files.skip(limit[0] - 1)
+            files.limit(limit[1] - limit[0] + 1)
         files.sort('_id', pymongo.DESCENDING)
         total_files = await collection.count_documents({"name": file_name})
+        if not limit:
+            return files
         return files, total_files
     
     async def get_file_byid(self, device_codename: str, file_type: str, id: str):
@@ -27,15 +30,18 @@ class Database:
         document = await collection.find_one({"_id": ObjectId(id)})
         return document
 
-    async def get_all_files(self, device_codename: str, file_type: str, limit: list):
+    async def get_all_files(self, device_codename: str, file_type: str, limit: list=[]):
         db = self.client[device_codename]
         collection = db[file_type]
     
         files=collection.find({})
-        files.skip(limit[0] - 1)
-        files.limit(limit[1] - limit[0] + 1)
+        if limit:
+            files.skip(limit[0] - 1)
+            files.limit(limit[1] - limit[0] + 1)
         # files.sort('_id', pymongo.DESCENDING)
         total_files = await collection.count_documents({})
+        if not limit:
+            return files
         return files, total_files
     
     async def add_file(self, device_codename: str, file_type: str, data: dict):
