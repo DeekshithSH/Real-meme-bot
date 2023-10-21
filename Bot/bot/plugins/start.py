@@ -39,6 +39,7 @@ async def get_div_list(db_names):
     ]
     btn.append([InlineKeyboardButton("🕰️ Old Build", "old|1")])
     btn.append(nav_btn)
+    btn.append([InlineKeyboardButton("📢 Update Channel", url=f'https://t.me/realme5s')])
     return btn
 
 @TGBot.on_message(filters.command("help") & filters.private)
