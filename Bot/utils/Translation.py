@@ -12,7 +12,8 @@ class Names(object):
         "RMX1911": "📱 Realme 5",
         "RMX1925": "📱 Realme 5s",
         "RMX2030": "📱 Realme 5i",
-        "R5X": "📱 Realme 5/5s/5i"
+        "R5X": "📱 Realme 5/5s/5i", 
+        "Garnet": "📱 Poco X6/Note 13 Pro"
     }
 
     Type={
