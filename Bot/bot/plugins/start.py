@@ -9,7 +9,7 @@ import pymongo
 from pyrogram import filters, Client
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, ForceReply
 from Bot.bot import TGBot
-from Bot.vars import Var
+from Bot.vars import Var, const
 from Bot.utils.Translation import Names, Command_Text, Types
 from Bot.utils.database import Database
 db = Database()
@@ -229,3 +229,27 @@ async def add_data(x:str, data):
         data["release_date"]=datetime.strptime(new_date_obj, "%d-%m-%Y %H:%M")
         data["_id"] = ObjectId.from_datetime(data["release_date"])  
         await add_data(x, data)
+
+@TGBot.on_message(filters.chat(list(const.group.keys())) & filters.command("post") & filters.reply)
+async def post_to_ch(bot: Client, message: Message):
+    device=message.text.split("/post")[-1]
+    if not device:
+        await message.reply_text("/post device_name")
+        return
+    if not (message.reply_to_message.photo or message.reply_to_message.document):
+        await message.reply_text("Reply to a Photo or Document")
+        return
+    chat_id=const.group.get(message.chat.id)
+    if not chat_id:
+        await message.reply_text("Coudn't find Channel id please contact @DeekshithSH")
+        return
+
+    if message.reply_to_message.from_user:
+        user=f"@{message.reply_to_message.from_user.username}" if message.reply_to_message.from_user.username else message.reply_to_message.from_user.mention
+    else:
+        user="Unknown User"
+    caption=f"Uploaded by {user}\nDevice: {device}"
+    if message.reply_to_message.photo:
+        await bot.send_cached_media(chat_id, message.reply_to_message.photo.file_id, caption=caption)
+    elif message.reply_to_message.document:
+        await bot.send_cached_media(chat_id, message.reply_to_message.document.file_id, caption=caption)

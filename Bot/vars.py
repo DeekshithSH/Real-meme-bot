@@ -19,3 +19,7 @@ class Var(object):
    OWNER_ID=list(set(int(x) for x in str(environ.get("OWNER_ID", "849816969")).split()))
    ADMIN_ID=list(set(int(x) for x in str(environ.get("ADMIN_ID", "849816969")).split()))
    ADMIN_ID.extend(OWNER_ID)
+
+class const:
+   # Group ID : Channel ID
+   group={-1002076739189:-1002058246383}

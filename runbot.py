@@ -20,6 +20,7 @@ loop = asyncio.get_event_loop()
 async def main():
     logging.info("Starting Bot")
     await TGBot.start()
+    print(f"Bot Username: {(await TGBot.get_me()).username}")
     # await update_file()
     # await fix_name()
 
