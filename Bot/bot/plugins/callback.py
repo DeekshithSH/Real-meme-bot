@@ -98,15 +98,15 @@ async def gen_ver_list(update:CallbackQuery,device:str, file_type:str, file:str,
 async def gen_message(update:CallbackQuery,device:str,file_type:str,_id:str):
     data=await db.get_file_byid(device,file_type,_id)
     date=datetime.strftime(data.get('release_date'), "%d-%m-%Y")
-    message=f"""------------------
-<a href=https://t.me/c/{str(data.get('channel_id')).removeprefix('-100')}/{data.get('msg_id')}>Post Link</a>
-------------------
-<b>{data.get('name')} | {data.get('version')} | {data.get('type')}</b>
+    message=f"""<b>{data.get('name')} | {data.get('version')} | {data.get('type')}</b>
 <b>{data.get('status') if not (data.get('type')=='Kernel') else ''}</b>
 <b>{'Android '+data.get('android_version') if data.get('android_version') else ''} {'Kernel '+data.get('kernel_version') if data.get('kernel_version') else ''}</b>
 by @{data.get('dev')}
 Release Date {date}
+<a href=https://t.me/c/{str(data.get('channel_id')).removeprefix('-100')}/{data.get('msg_id')}>Post Link</a>
+#{data.get('type')}
 """
+
     btn=[]
     for x,y in (data.get("download_link")).items():
         btn.append([InlineKeyboardButton(x, url=y)])
